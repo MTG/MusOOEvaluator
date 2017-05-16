@@ -177,6 +177,10 @@ SimilarityScoreChord::SimilarityScoreChord(const std::string& inPreset)
         theOutputLimitingSet.insert(ChordType::none());
 		initialize("tetradsWithBass", set<ChordType>(), theOutputLimitingSet, "exact");
 	}
+    else if (!inPreset.compare("5JazzFunctions"))
+  {
+      initialize("5JazzFunctions", set<ChordType>(), set<ChordType>(), "exact");
+  }
     else
 	{
 		throw runtime_error("Unknown score preset '" + inPreset + "'");
@@ -266,6 +270,15 @@ void SimilarityScoreChord::initialize(const std::string& inMapping, const std::s
             m_MappedTypes.insert(ChordType::suspendedSecond().addInterval(Interval::majorSeventh()));
             m_MappedTypes.insert(ChordType::suspendedSecond().addInterval(Interval::majorSixth()));
             m_MappedTypes.insert(ChordType::none());
+        }
+        else if (!m_Mapping.compare("5JazzFunctions"))
+        {
+          m_MappedTypes.insert(ChordType::major());
+          m_MappedTypes.insert(ChordType::dominantSeventh());
+          m_MappedTypes.insert(ChordType::minor());
+          m_MappedTypes.insert(ChordType::diminished());
+          m_MappedTypes.insert(ChordType::halfDiminished());
+          m_MappedTypes.insert(ChordType::none());
         }
         else if (!m_Mapping.compare("tetradsWithBass"))
         {
@@ -560,6 +573,30 @@ const ChordType SimilarityScoreChord::calcMappedChordType(const ChordType& inCho
     else if (m_Mapping == "none" || m_Mapping == "root" || m_Mapping == "rootWithBass")
     {
         return ChordType::rootOnly();
+    }
+    else if (m_Mapping == "5JazzFunctions")
+    {
+        if (inChordType.contains(Interval::majorThird()))
+        {
+            if (inChordType.contains(Interval::minorSeventh()))
+                return ChordType::dominantSeventh();
+            else
+                return ChordType::major();
+        }
+        else if (inChordType.contains(Interval::minorThird()))
+        {
+            if (inChordType.contains(Interval::diminishedFifth()))
+            {
+                if (inChordType.contains(Interval::minorSeventh()))
+                    return ChordType::halfDiminished();
+                else
+                    return ChordType::diminished();
+            }
+            else
+                return ChordType::minor();
+        }
+
+        return ChordType::undefined();
     }
     else
     {
